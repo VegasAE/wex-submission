@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/WexCardApi/">
+    <Project Path="src/WexCardApi/CardApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/WexCardApi.Tests/">
+    <Project Path="tests/WexCardApi.Tests/CardAPI.Test.csproj" />
+  </Folder>
+</Solution>
