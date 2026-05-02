@@ -1,0 +1,79 @@
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using WexCardApi.Controllers;
+using WexCardApi.Models;
+using WexCardApi.DB;
+using WexCardApi.DTO;
+
+public class TransactionTest
+{
+
+    private readonly AppDbContext _db;
+    private readonly TransactionsController _controller;
+    private readonly Card _card;
+
+    public TransactionTest()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString())
+            .Options;
+        _db = new AppDbContext(options);
+        _controller = new TransactionsController(_db);
+
+        _card = new Card { CreditLimit = 5000 };
+        _db.Cards.Add(_card);
+        _db.SaveChanges();
+    }
+
+    [Fact]
+    public async Task TransactionTest_ShouldCreate()
+    {
+        var payload = new CreateTransactionRequest("Test purchase", _card.Id, 100);
+
+        var resp = await _controller.CreateTransaction(payload);
+
+        var createdResult = Assert.IsType<CreatedResult>(resp.Result);
+        var transaction = Assert.IsType<Transaction>(createdResult.Value);
+        Assert.Equal("Test purchase", transaction.Description);
+        Assert.Equal(100, transaction.AmountUsd);
+        Assert.Equal(_card.Id, transaction.CardId);
+        Assert.NotEqual(Guid.Empty, transaction.Id);
+    }
+
+    [Fact]
+    public async Task TransactionTest_ShouldNotCreateWithInvalidCard()
+    {
+        var payload = new CreateTransactionRequest("Test purchase", Guid.NewGuid(), 100);
+
+        var resp = await _controller.CreateTransaction(payload);
+
+        Assert.IsType<BadRequestResult>(resp.Result);
+    }
+
+    [Fact]
+    public async Task TransactionTest_ShouldGet()
+    {
+        var transaction = new Transaction
+        {
+            Description = "Test purchase",
+            Date = DateTime.Now,
+            AmountUsd = 250,
+            CardId = _card.Id
+        };
+        _db.Transactions.Add(transaction);
+        await _db.SaveChangesAsync();
+
+        var resp = await _controller.GetTransaction(transaction.Id);
+        var getResult = Assert.IsType<OkObjectResult>(resp.Result);
+        var retrieved = Assert.IsType<Transaction>(getResult.Value);
+        Assert.Equal(transaction, retrieved);
+    }
+
+    [Fact]
+    public async Task TransactionTest_ShouldNotGet()
+    {
+        var resp = await _controller.GetTransaction(Guid.Empty);
+        Assert.IsType<NotFoundResult>(resp.Result);
+    }
+}

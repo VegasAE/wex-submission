@@ -32,8 +32,9 @@ public class CardsController : ControllerBase
     } 
 
     /*
-     * Returns the requested card based on Id
+     * Get request returns the requested card based on Id
     */
+    // GET: /api/cards/{id}
     [HttpGet("{id}")]
     public async Task<ActionResult<Card>> GetCard(Guid id)
     {
