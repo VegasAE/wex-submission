@@ -36,11 +36,22 @@ public class CardTest
     }
 
     [Fact]
-    public async Task CardTest_ShouldNotCreate()
+    public async Task CardTest_ShouldGet()
     {
-        var payload = new CreateCardRequest(-68);
-        var resp = await _controller.CreateCard(payload);
+        var card = new Card { CreditLimit = 1000 };
+        _db.Cards.Add(card);
+        await _db.SaveChangesAsync();
 
-        Assert.IsType<BadRequestResult>(resp.Result);
+        var resp = await _controller.GetCard(card.Id);
+        var getResult = Assert.IsType<OkObjectResult>(resp.Result);
+        var retreived = Assert.IsType<Card>(getResult.Value);
+        Assert.Equal(card, retreived);
+    }
+
+    [Fact]
+    public async Task CardTest_ShouldNotGet()
+    {
+        var resp = await _controller.GetCard(Guid.Empty);
+        var getResult = Assert.IsType<NotFoundResult>(resp.Result);
     }
 }
