@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WexCardApi.DB;
 using WexCardApi.DTO;
 using WexCardApi.Models;
+using WexCardApi.Services;
 
 namespace WexCardApi.Controllers;
 
@@ -12,14 +13,16 @@ namespace WexCardApi.Controllers;
 public class TransactionsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly TreasuryClient _exchange;
 
-    public TransactionsController(AppDbContext _db)
+    public TransactionsController(AppDbContext db, TreasuryClient exchange)
     {
-        this._db = _db;
+        _db = db;
+        _exchange = exchange;
     }
 
     /*
-     * Post request creates new card and returns Id for later use
+     * Post request creates new transaction and returns Id for later use
     */
     // POST: /api/transactions
     [HttpPost]
@@ -31,11 +34,12 @@ public class TransactionsController : ControllerBase
         if (resp == null)
             return BadRequest();
 
-        Transaction newTransaction = new Transaction{
+        Transaction newTransaction = new Transaction
+        {
             Description = payload.Description,
             Date = DateTime.Now, // TODO: Check this needs to be changed
             AmountUsd = payload.AmountUsd,
-            CardId = payload.CardId  
+            CardId = payload.CardId
         };
 
         _db.Transactions.Add(newTransaction);
@@ -48,14 +52,39 @@ public class TransactionsController : ControllerBase
      * Get request returns the requested transaction based on Id
     */
     // GET: /api/transactions/{id}
+    // GET: /api/transactions/{id}?currency={currency}
     [HttpGet("{id}")]
-    public async Task<ActionResult<Transaction>> GetTransaction(Guid id)
+    public async Task<ActionResult> GetTransaction(Guid id, [FromQuery] string? currency)
     {
         Transaction? transaction = await _db.Transactions.FindAsync(id);
 
         if (transaction == null)
             return NotFound();
 
-        return Ok(transaction);
+        if (currency == null)
+            return Ok(transaction);
+
+        // Check treasury client for exchange rate
+        GetExchangeRateRequest req = new GetExchangeRateRequest(currency, transaction.Date);
+
+        var record = await _exchange.GetExchangeRate(req);
+
+        if (record == null)
+            return NotFound("The purchase cannot be converted to the target currency");
+
+        // Convert exchange rate from string to decimal
+        decimal rate = decimal.Parse(record.ExchangeRate);
+
+        // Build new transaction return
+        ConvertedTransaction convTransaction = new ConvertedTransaction(
+            transaction.Id, 
+            transaction.Description,
+            transaction.Date,
+            transaction.AmountUsd,
+            rate, 
+            transaction.AmountUsd * rate
+        );
+        
+        return Ok(convTransaction);
     }
 }

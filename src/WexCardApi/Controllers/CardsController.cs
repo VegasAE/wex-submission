@@ -29,7 +29,7 @@ public class CardsController : ControllerBase
         await _db.SaveChangesAsync();
 
         return Created($"/api/cards/{newCard.Id}", newCard);
-    } 
+    }
 
     /*
      * Get request returns the requested card based on Id
