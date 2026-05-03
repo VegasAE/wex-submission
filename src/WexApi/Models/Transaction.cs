@@ -1,4 +1,4 @@
-namespace WexCardApi.Models;
+namespace WexApi.Models;
 
 public class Transaction
 {

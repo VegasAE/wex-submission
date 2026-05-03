@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace WexCardApi.DTO;
+namespace WexApi.DTO;
 
 public record TreasuryApiResponse(
     [property: JsonPropertyName("data")]

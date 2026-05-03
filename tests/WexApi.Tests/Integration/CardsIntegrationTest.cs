@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using WexCardApi.Models;
+using WexApi.Models;
 
 namespace CardAPI.Test.Integration;
 

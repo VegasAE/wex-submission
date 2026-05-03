@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using WexCardApi.DB;
-using WexCardApi.Services;
+using WexApi.DB;
+using WexApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

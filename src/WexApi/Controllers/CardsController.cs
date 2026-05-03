@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using WexCardApi.DB;
-using WexCardApi.Models;
-using WexCardApi.DTO;
+using WexApi.DB;
+using WexApi.Models;
+using WexApi.DTO;
 
-namespace WexCardApi.Controllers;
+namespace WexApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

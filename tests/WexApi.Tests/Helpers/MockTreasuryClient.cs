@@ -1,5 +1,5 @@
-using WexCardApi.DTO;
-using WexCardApi.Services;
+using WexApi.DTO;
+using WexApi.Services;
 
 public class MockTreasuryClient : ITreasuryClient
 {

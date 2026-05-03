@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 
-using WexCardApi.DB;
-using WexCardApi.DTO;
-using WexCardApi.Models;
-using WexCardApi.Services;
+using WexApi.DB;
+using WexApi.DTO;
+using WexApi.Models;
+using WexApi.Services;
 
-namespace WexCardApi.Controllers;
+namespace WexApi.Controllers;
 
 
 [ApiController]

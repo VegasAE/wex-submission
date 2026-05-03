@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WexCardApi\CardApi.csproj" />
+    <ProjectReference Include="..\..\src\WexApi\CardApi.csproj" />
   </ItemGroup>
 
 </Project>

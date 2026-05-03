@@ -1,4 +1,4 @@
-namespace WexCardApi.DTO;
+namespace WexApi.DTO;
 
 public record ConvertedTransaction(
     Guid Id,

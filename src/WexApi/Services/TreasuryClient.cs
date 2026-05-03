@@ -1,6 +1,6 @@
-using WexCardApi.DTO;
+using WexApi.DTO;
 
-namespace WexCardApi.Services;
+namespace WexApi.Services;
 
 public class TreasuryClient : ITreasuryClient
 {

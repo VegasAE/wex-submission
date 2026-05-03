@@ -1,10 +1,10 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
-using WexCardApi.Controllers;
-using WexCardApi.Models;
-using WexCardApi.DB;
-using WexCardApi.DTO;
+using WexApi.Controllers;
+using WexApi.Models;
+using WexApi.DB;
+using WexApi.DTO;
 
 public class TransactionTest
 {

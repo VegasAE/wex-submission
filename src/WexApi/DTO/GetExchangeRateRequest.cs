@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace WexCardApi.DTO;
+namespace WexApi.DTO;
 
 public record GetExchangeRateRequest(
     [Required] string Currency,

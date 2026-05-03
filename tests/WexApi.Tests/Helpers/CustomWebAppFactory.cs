@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using WexCardApi.DB;
+using WexApi.DB;
 
 public class CustomWebAppFactory : WebApplicationFactory<Program>
 {

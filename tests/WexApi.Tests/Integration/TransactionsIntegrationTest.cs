@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
-using WexCardApi.Models;
-using WexCardApi.DTO;
+using WexApi.Models;
+using WexApi.DTO;
 
 namespace CardAPI.Test.Integration;
 

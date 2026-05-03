@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using WexCardApi.Models;
+using WexApi.Models;
 
-namespace WexCardApi.DB;
+namespace WexApi.DB;
 
 
 public class AppDbContext : DbContext
