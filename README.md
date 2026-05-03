@@ -12,7 +12,7 @@ A C# ASP.NET Core Web API for managing cards with credit limits, recording purch
 1. Start the PostgreSQL database:
 
 ```bash
-docker compose up -d
+docker compose up
 ```
 
 2. Run the API:
