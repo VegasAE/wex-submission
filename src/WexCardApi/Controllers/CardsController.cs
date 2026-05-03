@@ -11,9 +11,9 @@ public class CardsController : ControllerBase
 {
     private readonly AppDbContext _db;
 
-    public CardsController(AppDbContext _db)
+    public CardsController(AppDbContext db)
     {
-        this._db = _db;
+        _db = db;
     }
 
     /*

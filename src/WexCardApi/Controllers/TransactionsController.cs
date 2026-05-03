@@ -13,9 +13,9 @@ namespace WexCardApi.Controllers;
 public class TransactionsController : ControllerBase
 {
     private readonly AppDbContext _db;
-    private readonly TreasuryClient _exchange;
+    private readonly ITreasuryClient _exchange;
 
-    public TransactionsController(AppDbContext db, TreasuryClient exchange)
+    public TransactionsController(AppDbContext db, ITreasuryClient exchange)
     {
         _db = db;
         _exchange = exchange;
@@ -32,12 +32,12 @@ public class TransactionsController : ControllerBase
         Card? resp = await _db.Cards.FindAsync(payload.CardId);
 
         if (resp == null)
-            return BadRequest();
+            return BadRequest("Bad Request");
 
         Transaction newTransaction = new Transaction
         {
             Description = payload.Description,
-            Date = DateTime.Now, // TODO: Check this needs to be changed
+            Date = DateTime.UtcNow,
             AmountUsd = payload.AmountUsd,
             CardId = payload.CardId
         };
@@ -72,19 +72,21 @@ public class TransactionsController : ControllerBase
         if (record == null)
             return NotFound("The purchase cannot be converted to the target currency");
 
-        // Convert exchange rate from string to decimal
-        decimal rate = decimal.Parse(record.ExchangeRate);
+        // Try to parse decimal and return error if fails
+        if (!decimal.TryParse(record.ExchangeRate, out decimal rate))
+            return StatusCode(502, "Invalid exchange rate received from Treasury API");
+
 
         // Build new transaction return
         ConvertedTransaction convTransaction = new ConvertedTransaction(
-            transaction.Id, 
+            transaction.Id,
             transaction.Description,
             transaction.Date,
             transaction.AmountUsd,
-            rate, 
+            rate,
             transaction.AmountUsd * rate
         );
-        
+
         return Ok(convTransaction);
     }
 }

@@ -10,6 +10,7 @@ public class TransactionTest
 {
 
     private readonly AppDbContext _db;
+    private readonly MockTreasuryClient _mockExchange;
     private readonly TransactionsController _controller;
     private readonly Card _card;
 
@@ -19,7 +20,8 @@ public class TransactionTest
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
         _db = new AppDbContext(options);
-        _controller = new TransactionsController(_db);
+        _mockExchange = new MockTreasuryClient();
+        _controller = new TransactionsController(_db, _mockExchange);
 
         _card = new Card { CreditLimit = 5000 };
         _db.Cards.Add(_card);
@@ -48,7 +50,7 @@ public class TransactionTest
 
         var resp = await _controller.CreateTransaction(payload);
 
-        Assert.IsType<BadRequestResult>(resp.Result);
+        Assert.IsType<BadRequestObjectResult>(resp.Result);
     }
 
     [Fact]
@@ -64,8 +66,8 @@ public class TransactionTest
         _db.Transactions.Add(transaction);
         await _db.SaveChangesAsync();
 
-        var resp = await _controller.GetTransaction(transaction.Id);
-        var getResult = Assert.IsType<OkObjectResult>(resp.Result);
+        var resp = await _controller.GetTransaction(transaction.Id, null);
+        var getResult = Assert.IsType<OkObjectResult>(resp);
         var retrieved = Assert.IsType<Transaction>(getResult.Value);
         Assert.Equal(transaction, retrieved);
     }
@@ -73,7 +75,64 @@ public class TransactionTest
     [Fact]
     public async Task TransactionTest_ShouldNotGet()
     {
-        var resp = await _controller.GetTransaction(Guid.Empty);
-        Assert.IsType<NotFoundResult>(resp.Result);
+        var resp = await _controller.GetTransaction(Guid.Empty, null);
+        Assert.IsType<NotFoundResult>(resp);
+    }
+
+    [Fact]
+    public async Task TransactionTest_ShouldGetWithCurrency()
+    {
+        _mockExchange.SetResponse(new TreasuryRateRecord("Dollar", "1.5", "2026-01-01"));
+        var transaction = new Transaction
+        {
+            Description = "Test Purchase Currency",
+            Date = DateTime.Parse("2026-02-15"),
+            AmountUsd = 250,
+            CardId = _card.Id
+        };
+        _db.Transactions.Add(transaction);
+        await _db.SaveChangesAsync();
+
+        var resp = await _controller.GetTransaction(transaction.Id, "Dollar");
+        var getResult = Assert.IsType<OkObjectResult>(resp);
+        var retrieved = Assert.IsType<ConvertedTransaction>(getResult.Value);
+
+        var expected = new ConvertedTransaction
+        (
+            transaction.Id,
+            transaction.Description,
+            transaction.Date,
+            transaction.AmountUsd,
+            1.5M,
+            transaction.AmountUsd * 1.5M
+        );
+
+        Assert.Equal(expected, retrieved);
+    }
+
+    [Fact]
+    public async Task TransactionTest_ShouldNotGetWithCurrency_NoRateAvailable()
+    {
+        _mockExchange.SetResponse(null);
+        var transaction = new Transaction
+        {
+            Description = "Test Purchase No Rate",
+            Date = DateTime.Parse("2026-02-15"),
+            AmountUsd = 250,
+            CardId = _card.Id
+        };
+        _db.Transactions.Add(transaction);
+        await _db.SaveChangesAsync();
+
+        var resp = await _controller.GetTransaction(transaction.Id, "FakeCurrency");
+        var notFound = Assert.IsType<NotFoundObjectResult>(resp);
+        Assert.Equal("The purchase cannot be converted to the target currency", notFound.Value);
+    }
+
+    [Fact]
+    public async Task TransactionTest_ShouldNotGetWithCurrency_TransactionNotFound()
+    {
+        var resp = await _controller.GetTransaction(Guid.Empty, "Dollar");
+        Assert.IsType<NotFoundResult>(resp);
     }
 }

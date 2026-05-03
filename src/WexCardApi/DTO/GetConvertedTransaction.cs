@@ -1,8 +1,6 @@
-using WexCardApi.Models;
-
 namespace WexCardApi.DTO;
 
-public record ConvertedTransaction (
+public record ConvertedTransaction(
     Guid Id,
     string Description,
     DateTime TransactionDate,

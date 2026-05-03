@@ -17,4 +17,3 @@ public record TreasuryRateRecord(
     [property: JsonPropertyName("record_date")]
     string RecordDate
 );
- 

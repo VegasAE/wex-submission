@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using WexCardApi.Models;
+using WexCardApi.DTO;
 
 namespace CardAPI.Test.Integration;
 
@@ -111,6 +112,57 @@ public class TransactionsIntegrationTest : IClassFixture<CustomWebAppFactory>
     public async Task GetTransaction_NonExistentTransaction_Returns404()
     {
         var response = await _client.GetAsync($"/api/transactions/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetTransaction_ExistingTransaction_WithCurrency_Returns200()
+    {
+        var card = await CreateTestCard();
+
+        var createResponse = await _client.PostAsJsonAsync("/api/transactions", new
+        {
+            description = "Test purchase with Currency",
+            cardId = card.Id,
+            amountUsd = 250
+        });
+        var created = await createResponse.Content.ReadFromJsonAsync<Transaction>();
+
+        var response = await _client.GetAsync($"/api/transactions/{created!.Id}?currency=Euro");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var convTransaction = await response.Content.ReadFromJsonAsync<ConvertedTransaction>();
+        Assert.NotNull(convTransaction);
+        Assert.Equal(created.Description, convTransaction.Description);
+        Assert.Equal(created.AmountUsd, convTransaction.OriginalAmount);
+        Assert.Equal(created.Date, convTransaction.TransactionDate);
+        Assert.Equal(convTransaction.ConvertedAmount, created.AmountUsd * convTransaction.ExchangeRate);
+    }
+
+    [Fact]
+    public async Task GetTransaction_ExistingTransaction_WithInvalidCurrency_Returns404()
+    {
+        var card = await CreateTestCard();
+
+        var createResponse = await _client.PostAsJsonAsync("/api/transactions", new
+        {
+            description = "Test purchase",
+            cardId = card.Id,
+            amountUsd = 250
+        });
+        var created = await createResponse.Content.ReadFromJsonAsync<Transaction>();
+
+        var response = await _client.GetAsync($"/api/transactions/{created!.Id}?currency=FakeCurrency123");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetTransaction_NonExistentTransaction_WithCurrency_Returns404()
+    {
+        var response = await _client.GetAsync($"/api/transactions/{Guid.NewGuid()}?currency=Euro");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }

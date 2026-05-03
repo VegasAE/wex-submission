@@ -2,7 +2,7 @@ using WexCardApi.DTO;
 
 namespace WexCardApi.Services;
 
-public class TreasuryClient
+public class TreasuryClient : ITreasuryClient
 {
     private const string BaseApiUrl = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/od/rates_of_exchange";
 
@@ -20,7 +20,7 @@ public class TreasuryClient
         string qParams = "?sort=-record_date&format=json&fields=record_date,country,currency,exchange_rate,country_currency_desc&page[size]=1";
         string filters = $"&filter=currency:eq:{req.Currency},record_date:gte:{sixMonth:yyyy-MM-dd},record_date:lte:{req.RecordDate:yyyy-MM-dd}";
 
-        string fullUrl = BaseApiUrl+qParams+filters;
+        string fullUrl = BaseApiUrl + qParams + filters;
 
         TreasuryApiResponse? resp = await _http.GetFromJsonAsync<TreasuryApiResponse>(fullUrl);
 
