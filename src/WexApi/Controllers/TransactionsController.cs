@@ -21,9 +21,6 @@ public class TransactionsController : ControllerBase
         _exchange = exchange;
     }
 
-    /*
-     * Post request creates new transaction and returns Id for later use
-    */
     // POST: /api/transactions
     [HttpPost]
     public async Task<ActionResult<Transaction>> CreateTransaction([FromBody] CreateTransactionRequest payload)
@@ -48,9 +45,6 @@ public class TransactionsController : ControllerBase
         return Created($"/api/transactions/{newTransaction.Id}", newTransaction);
     }
 
-    /*
-     * Get request returns the requested transaction based on Id
-    */
     // GET: /api/transactions/{id}
     // GET: /api/transactions/{id}?currency={currency}
     [HttpGet("{id}")]

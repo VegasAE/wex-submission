@@ -105,3 +105,6 @@ If no exchange rate is available within 6 months on or before the transaction da
 - **Transaction amounts are stored in USD.** All amounts are recorded in US dollars. Currency conversion is applied only at retrieval time using the Treasury API exchange rates.
 
 - **Requirement #4 (card balance) was not implemented.** Per the assignment guidelines, I tried to stick to the four hour time period as was unable to complete requirement four in that time.
+
+## AI Tool Use
+- Claude Code was used to help speed up code process, primarily in writing tests and completing mass renames or cleanups.
